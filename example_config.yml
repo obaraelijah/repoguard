@@ -1,0 +1,15 @@
+owner: my-org
+repository: my-repo
+monitoring: 
+  - name: job
+    workflow: workflow.yml
+    status: queued
+  - name: pull_requests
+    status: open
+  - name: rate_limit # get rate_limit for current user
+  - name: rate_limit
+    pat_env: BOT_1_PAT
+  - name: job
+    workflow: wolkfow.yml
+    status: running
+    repo: other-repo
