@@ -14,11 +14,19 @@ lazy_static! {
         &["owner", "repository", "status", "workflow"]
     )
     .unwrap();
+    pub static ref JOBS_QUEUE_TIME: IntGaugeVec = register_int_gauge_vec!(
+        "github_jobs_queue_time",
+        "Queue time of jobs",
+        &["owner", "repository", "status", "workflow"]
+    )
+    .unwrap();
+    pub static ref RATE_LIMIT: IntGaugeVec =
+        register_int_gauge_vec!("github_rate_limit", "Rate limit", &["username"]).unwrap();
     pub static ref CUSTOM: IntGaugeVec = register_int_gauge_vec!(
         "github_custom",
         "Custom metric",
         &[
-            "owener",
+            "owner",
             "repository",
             "url",
             "query",
