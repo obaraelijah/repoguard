@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
-use log::error;
 use serde::Deserialize;
+use log::{debug, error, info};
 use octocrab::{params::State, Octocrab};
 
 #[derive(Debug, Deserialize)]
@@ -16,6 +16,7 @@ pub struct Config {
     pub default_repo: Rc<str>,
 }
 
+#[derive(Debug, Deserialize)]
 pub enum Monitoring {
     Job {
         status: Option<String>,
@@ -67,10 +68,12 @@ pub async fn query(
     defo_repo: Rc<str>,
     monitor: Rc<Monitoring>,
 ) {
+    info!("Querying {:?}", monitor);
     let default = Repository {
         owner: def_owner.to_string(),
         repository: defo_repo.to_string(),
     };
+    debug!("Default repo settings: {:?}", default);
     match monitor.as_ref() {
         Monitoring::Job { 
             status, 
@@ -78,6 +81,7 @@ pub async fn query(
             repo 
         } => {
             let repo_def = repo.as_ref().unwrap_or(&default);
+            debug!("Using repo settings: {:?}", repo_def);
 
             // Builder for GitHub workflows
             let builder = octo.workflows(&repo_def.owner, &repo_def.repository);
@@ -85,9 +89,12 @@ pub async fn query(
 
             // Apply status filter if specified
             if let Some(status) = &status {
+                debug!("Filtering job status to {:?}", status);
                 run_builder = run_builder.status(status);
             }
+            info!("Querying repo runs");
             let runs = run_builder.send().await.unwrap();
+            debug!("Got runs: {:?}", runs);
         }
         Monitoring::PullRequests { 
             status, 
@@ -95,13 +102,16 @@ pub async fn query(
             repo 
         } => {
             let repo_def = repo.as_ref().unwrap_or(&default);
+            debug!("Using repo settings: {:?}", repo_def);
             
             let builder = octo.issues(&repo_def.owner, &repo_def.repository);
             let mut pull_builder = builder.list();
             if let Some(status) = &status {
+                debug!("Filtering pull request status to {:?}", status);
                 pull_builder = pull_builder.state(status.clone().into());
             }
             if let Some(labels) = &labels {
+                debug!("Filtering pull request labels to {:?}", labels);
                 pull_builder = pull_builder.labels(labels)
             }
             let pulls = pull_builder.send().await.unwrap();
