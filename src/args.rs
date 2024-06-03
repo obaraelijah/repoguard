@@ -1,5 +1,6 @@
-use clap::Parser;
- 
+use clap::{Parser, ValueEnum};
+use log::Level;
+
 #[derive(Parser, Debug)]
 #[command()]
 pub struct Args {
@@ -31,7 +32,27 @@ pub struct Args {
         help = "The GitHub App Secret"
     )]
     pub app_secret: Option<String>,
+    #[arg(long, short, help = "The log level", default_value = "info")]
+    pub log_level: LogLevels,
 }
 
+#[derive(ValueEnum, Debug, Clone)]
+pub enum LogLevels {
+    Trace,
+    Debug,
+    Info,
+    Warn,
+    Error,
+}
 
-
+impl Into<Level> for LogLevels {
+    fn into(self) -> Level {
+        match self {
+            LogLevels::Trace => Level::Trace,
+            LogLevels::Debug => Level::Debug,
+            LogLevels::Info => Level::Info,
+            LogLevels::Warn => Level::Warn,
+            LogLevels::Error => Level::Error,
+        }
+    }
+}
