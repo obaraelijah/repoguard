@@ -9,7 +9,7 @@ use config::Config;
 
 fn main() {
     let args = Args::parse();
-    simple_logger::init_with_level(log::Level::Debug).unwrap();
+    simple_logger::init_with_level(args.log_level.into()).unwrap();
 
     let file = fs::File::open(args.config).expect("Failed to open config file");
 
