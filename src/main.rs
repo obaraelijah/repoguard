@@ -8,6 +8,8 @@ use octocrab::{models::AppId, Octocrab};
 
 use log::{debug, info, trace};
 
+use crate::config::query;
+
 mod args;
 mod config;
 mod prometheus;
@@ -37,5 +39,14 @@ fn main() {
             EncodingKey::from_base64_secret(&app_secret).unwrap(),
         );
     }
-    let _octo = Arc::new(octo_builder.build().expect("Failed to build octocrab"));
+    let octo = Arc::new(octo_builder.build().expect("Failed to build octocrab"));
+
+    for monitor in &config.monitoring {
+        query(
+            &octo, 
+            config.default_owner.clone(), 
+            config.default_repo.clone(), 
+            monitor.clone()
+        );    
+    }
 }
