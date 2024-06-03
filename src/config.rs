@@ -4,6 +4,8 @@ use serde::Deserialize;
 use log::{debug, error, info};
 use octocrab::{params::State, Octocrab};
 
+use crate::prometheus::{self, JOBS_QUEUE_SIZE, PULL_REQUESTS_COUNT};
+
 #[derive(Debug, Deserialize)]
 pub(crate) struct Repository {
     owner: String,
@@ -95,6 +97,16 @@ pub async fn query(
             info!("Querying repo runs");
             let runs = run_builder.send().await.unwrap();
             debug!("Got runs: {:?}", runs);
+
+            info!("Pushing metrics to prometheus");
+            JOBS_QUEUE_SIZE
+                .with_label_values(&[
+                    &repo_def.owner,
+                    &repo_def.repository,
+                    &status.as_ref().unwrap_or(&"".to_string()),
+                    &workflow,
+                ])
+                .set(runs.total_count.unwrap_or(0) as i64);
         }
         Monitoring::PullRequests { 
             status, 
@@ -124,6 +136,16 @@ pub async fn query(
                 .filter(|issue| issue.pull_request.is_some())
                 .count();
             let tmp: String = status.as_ref().unwrap_or(&PRStatus::All).into();
+
+            info!("Pushing metrics to prometheus");
+            PULL_REQUESTS_COUNT
+                .with_label_values(&[
+                    &repo_def.owner,
+                    &repo_def.repository,
+                    &tmp,
+                    &labels.as_ref().unwrap_or(&vec![]).join(","),
+                ])
+                .set(count as i64);
         }
         Monitoring::Custom { .. } => {
             error!("Custom monitoring not implemented");
