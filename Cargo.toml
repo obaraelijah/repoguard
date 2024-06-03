@@ -7,7 +7,9 @@ edition = "2021"
 anyhow = "1.0.80"
 clap = { version = "4.5.3", features = ["derive", "env", "cargo"] }
 log = "0.4.21"
+jsonwebtoken = "9.2.0"
 octocrab = "0.38.0"
+prometheus = "0.13.3"
 simple_logger = "5.0.0"
 serde = { version = "1.0.197", features = ["derive", "alloc", "rc"] }
 serde_json = "1.0.114"

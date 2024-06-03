@@ -17,6 +17,7 @@ pub struct Args {
         conflicts_with_all = [ "app_id", "app_secret", "help"],
         help = "The personal access token for the GitHub App"
     )]
+    // Personal Access Token
     pub pat: Option<String>,
     #[arg(
         long,
